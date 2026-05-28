@@ -81,6 +81,5 @@ dog-breed-identification/
 - **前端层**：HTML5 + Bootstrap 5 + JavaScript (Fetch API 异步请求)
 - **数据处理**：Pillow + Torchvision Transforms
 ```
-3. **Commit 信息**：修改 README 时，Commit 理由可以写：`Docs: 更新 README.md，增加详细的启动指南和环境配置说明`。
 
 这样这份文档就完美了！老师看一眼就知道怎么跑，你们的平时成绩稳了！
