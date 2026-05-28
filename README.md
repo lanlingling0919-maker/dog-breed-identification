@@ -41,24 +41,6 @@ dog-breed-identification/
 │   └── js/
 └── templates/             # HTML 模板页面
     └── index.html
-## 🚀 快速启动指南
-1. 环境准备
-建议使用 Anaconda 创建虚拟环境：
-code
-Bash
-conda create -n dog_ai python=3.10
-conda activate dog_ai
-2. 安装依赖
-code
-Bash
-pip install -r requirements.txt
-3. 运行项目
-在项目根目录下执行：
-code
-Bash
-python app.py
-启动后，在浏览器访问：http://127.0.0.1:5000
-📊 实验结果
-基础模型：ResNet50
-识别种类：120 种
+
+
 训练表现：见项目内 training/accuracy_plot.png
