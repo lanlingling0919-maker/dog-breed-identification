@@ -1,51 +1,87 @@
-/* 基础背景样式 */
-body {
-    background-color: #f8f9fa;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+:root {
+    --deep-orange: #f39c12; 
+    --light-cream: #fff9f4;
+    --orange-gradient: linear-gradient(135deg, #f39c12, #e67e22);
 }
 
-/* 上传区域的虚线框效果（体现专业感） */
-.upload-area {
-    border: 2px dashed #dee2e6;
-    border-radius: 15px;
-    padding: 40px;
-    background-color: #fff;
-    transition: all 0.3s ease;
-    cursor: pointer;
+/* 允许滑动，确保内容不被切断 */
+body, html {
+    height: auto !important;
+    min-height: 100%;
+    margin: 0;
+    overflow-y: auto !important; 
+    background-color: var(--light-cream);
+    font-family: 'Quicksand', 'Noto Sans SC', sans-serif;
 }
 
-.upload-area:hover {
-    border-color: #0d6efd;
-    background-color: #f1f7ff;
+.app-dashboard { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* 压缩顶栏 */
+.deep-orange-header { background: var(--deep-orange); height: 50px; color: white; flex-shrink: 0; }
+.header-logo { font-size: 1.1rem; font-weight: 700; }
+
+.main-stage { flex: 1; }
+
+/* 压缩标题区 */
+.main-headline { font-size: 1.8rem; font-weight: 700; color: #2c3e50; }
+.subtitle { font-size: 0.85rem; }
+
+.warm-card { background: white; border-radius: 20px; border: none; overflow: hidden; margin-bottom: 15px; }
+.card-label { background: #fdf2e9; color: var(--deep-orange); padding: 5px 20px; font-size: 0.75rem; font-weight: 700; }
+
+/* 核心：大大缩小上传框的高度，腾出空间给下方的狗狗图片 */
+.upload-box-warm { 
+    border: 2px dashed #fbd38d; 
+    background-color: #fffaf0; 
+    border-radius: 15px; 
+    text-align: center; 
+    padding: 10px !important; /* 极小内边距 */
+}
+.text-orange { color: var(--deep-orange); }
+.text-orange-light { color: #ffe0b2; }
+
+.btn-orange-pill { 
+    background-color: var(--deep-orange); 
+    color: white; 
+    border-radius: 50px; 
+    font-weight: 700; 
+    padding: 5px 20px; 
+    font-size: 0.8rem;
 }
 
-/* 识别结果的卡片美化 */
-#result-area {
-    border-left: 5px solid #198754; /* 左侧绿色竖条，表示成功 */
-    animation: fadeInUp 0.5s ease;
+.btn-predict-deep { 
+    background: var(--orange-gradient); 
+    color: white; 
+    border: none; 
+    border-radius: 12px; 
+    font-weight: 700; 
+    font-size: 1.1rem;
 }
 
-/* 图片预览图的圆角阴影 */
-#image-preview {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+/* 预览图高度自适应，并确保能完整显示 */
+.preview-stage, .placeholder-stage { 
+    background: #fafafa; 
+    border-radius: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    overflow: hidden; 
+    min-height: 200px; 
+    max-height: 350px; 
+    border: 1px solid #eee;
+}
+.img-fluid { 
+    max-height: 330px; /* 限制图片高度，防止撑开页面 */
+    width: auto; 
+    object-fit: contain; 
+    padding: 5px; 
 }
 
-/* 加载动画容器 */
-#loader {
-    padding: 20px;
-}
+.result-dashboard { background: #fff; border: 1px solid #fef1e6; border-radius: 20px; padding: 20px; }
+.bg-orange-soft { background: #fef1e6; }
+.bg-orange-gradient { background: var(--orange-gradient); }
 
-/* 简单的入场动画 */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+@keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.animate-pop { animation: popIn 0.5s ease; }
+.animate-fade { animation: fadeIn 0.8s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
