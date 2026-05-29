@@ -81,3 +81,8 @@ dog-breed-identification/
 - **前端层**：HTML5 + Bootstrap 5 + JavaScript (Fetch API 异步请求)
 - **数据处理**：Pillow + Torchvision Transforms
 ```
+贡献者：
+lanlingling0919:兰棱棱
+zhoulinlin04616:周洲
+zhengky21：郑柯月
+monster247-coder：刘童
