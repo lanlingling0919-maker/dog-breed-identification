@@ -5,55 +5,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewContainer = document.getElementById('preview-container');
     const resultArea = document.getElementById('result-area');
     const loader = document.getElementById('loader');
+    const confBar = document.getElementById('conf-bar');
+    const placeholder = document.getElementById('placeholder-box');
+    const defaultMsg = document.getElementById('default-msg');
 
-    // 1. 图片预览逻辑 (刘童要求的功能)
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 preview.src = e.target.result;
-                previewContainer.style.display = 'block';
+                previewContainer.style.display = 'flex';
+                placeholder.style.display = 'none';
                 predictBtn.disabled = false;
                 resultArea.style.display = 'none';
+                defaultMsg.style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // 2. 异步 API 调用逻辑 (你的核心任务)
     predictBtn.addEventListener('click', async () => {
         const file = fileInput.files[0];
         const formData = new FormData();
         formData.append('file', file);
 
-        // 显示加载状态
         loader.style.display = 'block';
+        defaultMsg.style.display = 'none';
         predictBtn.disabled = true;
         resultArea.style.display = 'none';
 
         try {
-            // 发送 POST 请求到 Flask 接口
             const response = await fetch('/predict', {
                 method: 'POST',
                 body: formData
             });
-
             const data = await response.json();
-
             if (data.success) {
-                // 3. 将后端返回的 JSON 渲染到页面上
                 document.getElementById('res-cn').innerText = data.breed_cn;
                 document.getElementById('res-en').innerText = data.breed_en;
                 document.getElementById('res-conf').innerText = data.confidence_pct;
-                
+                if(confBar) confBar.style.width = data.confidence_pct;
                 resultArea.style.display = 'block';
             } else {
                 alert("识别失败：" + data.error);
+                defaultMsg.style.display = 'block';
             }
         } catch (error) {
-            console.error("Error:", error);
-            alert("服务器连接失败");
+            alert("后端连接失败");
+            defaultMsg.style.display = 'block';
         } finally {
             loader.style.display = 'none';
             predictBtn.disabled = false;
