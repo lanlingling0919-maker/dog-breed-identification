@@ -23,7 +23,10 @@ classes = checkpoint["classes"]
 
 model = models.resnet50(weights=None)
 num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, len(classes))
+model.fc = nn.Sequential(
+    nn.Dropout(0.3), # 这里的参数要和 train.py 一致
+    nn.Linear(num_ftrs, len(classes))
+)
 
 model.load_state_dict(checkpoint["model_state_dict"])
 model.to(device)
