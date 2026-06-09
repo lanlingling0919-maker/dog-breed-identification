@@ -3,7 +3,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import os
 
-def get_data_loaders(data_dir='dataset_final', batch_size=32, image_size=224):
+def get_data_loaders(data_dir='../dataset_final', batch_size=32, image_size=224):
     """
     配置数据增强并返回训练/验证加载器
     :param data_dir: 数据集根目录
@@ -13,13 +13,15 @@ def get_data_loaders(data_dir='dataset_final', batch_size=32, image_size=224):
     
     # 1. 定义【训练集】的增强方案：旨在让模型见过各种各样的“变种”狗
     train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(image_size), # 随机裁剪并缩放
-        transforms.RandomHorizontalFlip(),       # 随机水平翻转（狗头向左或向右不影响品种）
-        transforms.RandomRotation(15),           # 随机旋转一个小角度
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2), # 随机亮度/对比度
-        transforms.ToTensor(),                   # 转为张量
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) # ImageNet 标准标准化
-    ])
+    transforms.RandomResizedCrop(image_size),
+    transforms.TrivialAugmentWide(), # 自动应用各种增强策略
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(20),                # 稍微加大旋转角度
+    transforms.ColorJitter(0.3, 0.3, 0.3),        # 加强颜色抖动
+    transforms.RandomGrayscale(p=0.1),            # 10%概率变灰度，增加鲁棒性
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
     # 2. 定义【验证集】的方案：不加随机干扰，只做必要的标准化
     val_transform = transforms.Compose([

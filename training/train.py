@@ -13,7 +13,7 @@ def train_model():
     
     # 2. 参数设置
     batch_size = 64
-    epochs = 20
+    epochs = 50
     learning_rate = 0.0003
     best_acc = 0.0
 
@@ -28,7 +28,7 @@ def train_model():
     # 4. 初始化模型
     print("正在加载本地预训练模型 ResNet50...")
     model = models.resnet50(weights=None) 
-    local_weights_path = 'resnet50-11ad3fa6.pth'
+    local_weights_path = '../models/resnet50-11ad3fa6.pth'
     
     if os.path.exists(local_weights_path):
         state_dict = torch.load(local_weights_path)
@@ -39,13 +39,22 @@ def train_model():
         return
 
     num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, len(classes)) 
+    model.fc = nn.Sequential(
+    nn.Dropout(0.3),  # 丢弃 30% 的神经元防止过拟合
+    nn.Linear(num_ftrs, len(classes))
+) 
     model = model.to(device)
 
     # 5. 定义损失函数和优化器
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    optimizer = optim.Adam([
+        {'params': model.layer1.parameters(), 'lr': learning_rate * 0.1},
+        {'params': model.layer2.parameters(), 'lr': learning_rate * 0.1},
+        {'params': model.layer3.parameters(), 'lr': learning_rate * 0.1},
+        {'params': model.layer4.parameters(), 'lr': learning_rate * 0.1},
+        {'params': model.fc.parameters(), 'lr': learning_rate} # 全连接层维持原速
+    ], lr=learning_rate * 0.1)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     # 6. 正式训练循环
     print(f"\n🚀 训练启动！目标：识别 {len(classes)} 种狗狗")
@@ -107,7 +116,7 @@ def train_model():
         # 7. 保存最优模型
         if val_acc > best_acc:
             best_acc = val_acc
-            save_path = 'best_dog_model.pth'
+            save_path = '../models/best_dog_model.pth'
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
