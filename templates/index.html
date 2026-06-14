@@ -2,103 +2,22 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐕 AI 智能犬种识别系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Quicksand:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <title>AI 智能犬种识别系统</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="app-dashboard">
-        <header class="deep-orange-header shadow">
-            <div class="container-fluid px-4 h-100 d-flex align-items-center">
-                <span class="header-logo"><i class="fas fa-paw me-2"></i>AI Dog Breed Identifier</span>
-            </div>
-        </header>
+    <nav class="top-nav"><div class="nav-content"><div class="logo">🐾 AI Dog Breed Identifier</div><div class="menu"><span onclick="goPage('home')">首页</span><span onclick="goPage('history')">识别历史</span><span id="admin-nav" onclick="goPage('admin')" style="display:none; color:#ffd700;">🛡️ 管理后台</span><button id="auth-btn" onclick="openAuthModal()">登录/注册</button></div></div></nav>
+    
+    <!-- 首页 -->
+    <main id="home-view" class="container"><header class="page-title"><h1>🐕 智能犬种识别系统</h1><p>由深度神经网络为您精准识别</p></header><div class="grid-layout"><div class="card"><div class="card-header">🖼️ 照片上传预览</div><div class="drop-zone" onclick="clickUpload()"><input type="file" id="file-input" hidden onchange="previewImg(this)"><div id="upload-hint">📤 点击上传狗狗照片</div><img id="img-preview" style="display:none;"></div></div><div class="card"><div class="card-header">⚙️ 智能分析引擎</div><button class="btn-primary" onclick="startIdentify()">开始智能识别分析</button><div id="result-box" style="display:none; flex:1; display:flex; flex-direction:column;"><div class="res-summary"><div class="res-item"><p class="label">结论</p><p class="val-big" id="res-cn">--</p><p class="val-sub" id="res-en">--</p></div><div class="res-item"><p class="label">置信度</p><p class="val-big" id="res-conf">0%</p></div></div><div class="wiki-box"><p style="font-weight:800; margin-bottom:10px; color:#e69138;">📖 犬种百科：</p><div id="wiki-text"></div></div></div><button id="apply-btn" onclick="applyAdmin()" class="btn-minor" style="display:none; margin-top:20px;">申请管理员</button></div></div></main>
 
-        <div class="main-stage container-fluid px-4 py-2">
-            <!-- 标题区：大幅压缩间距 -->
-            <div class="title-section text-center mb-2 animate-fade">
-                <h2 class="main-headline mb-0">🐕 智能犬种识别系统</h2>
-                <p class="text-secondary small subtitle">上传狗狗照片，为您精准识别品种</p>
-            </div>
+    <!-- 历史 -->
+    <main id="history-view" class="container" style="display:none;"><div class="card"><h1>📜 识别档案</h1><div id="history-grid" class="history-grid"></div></div></main>
 
-            <div class="row gx-4">
-                <!-- 左侧：照片选择 -->
-                <div class="col-lg-5">
-                    <div class="warm-card shadow-sm">
-                        <div class="card-label"><i class="fas fa-image me-2"></i>照片上传预览</div>
-                        <div class="card-body p-3">
-                            <!-- 压缩后的上传框 -->
-                            <div class="upload-box-warm" id="drop-area">
-                                <input type="file" id="file-input" hidden accept="image/*">
-                                <div class="upload-content">
-                                    <i class="fas fa-cloud-arrow-up fa-2x text-orange mb-1"></i>
-                                    <p class="fw-bold mb-2">拖拽或点击</p>
-                                    <label for="file-input" class="btn btn-orange-pill btn-sm">选择狗狗照片</label>
-                                </div>
-                            </div>
-                            
-                            <!-- 狗狗图片展示区：重点优化，确保能看见 -->
-                            <div id="preview-container" class="preview-stage mt-2 animate-pop" style="display: none;">
-                                <img id="image-preview" class="img-fluid rounded shadow-sm">
-                            </div>
-                            <div id="placeholder-box" class="placeholder-stage mt-2">
-                                <i class="fas fa-dog fa-3x text-orange-light mb-2"></i>
-                                <p class="text-muted small">预览区域</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- 管理中心 -->
+    <main id="admin-view" class="container" style="display:none;"><div class="admin-grid"><div class="card"><h3>📊 系统运行指标</h3><div class="stats-row"><div class="stat-item"><p>总用户</p><b id="stat-users">0</b></div><div class="stat-item"><p>总识别</p><b id="stat-imgs">0</b></div></div></div><div class="card"><h3>🛡️ 待审批申请</h3><div id="pending-list"></div></div><div class="card full-width"><h3>🕵️ 全站行为审计（含照片）</h3><div id="admin-logs" class="admin-table"></div></div></div></main>
 
-                <!-- 右侧：分析识别 -->
-                <div class="col-lg-7">
-                    <div class="warm-card shadow-sm">
-                        <div class="card-label"><i class="fas fa-microchip me-2"></i>智能分析结果</div>
-                        <div class="card-body p-3">
-                            <button id="predict-btn" class="btn btn-predict-deep w-100 py-2 mb-3 shadow-sm" disabled>
-                                <i class="fas fa-wand-magic-sparkles me-2"></i>开始智能识别分析
-                            </button>
-                            
-                            <div class="results-container">
-                                <div id="loader" class="text-center py-4" style="display: none;">
-                                    <i class="fas fa-dog fa-bounce fa-2x text-orange mb-2"></i>
-                                    <p class="text-orange fw-bold">分析中...</p>
-                                </div>
-                                
-                                <div id="result-area" class="result-dashboard animate-pop" style="display: none;">
-                                    <div class="row g-0 align-items-center">
-                                        <div class="col-md-7 text-center border-end">
-                                            <span class="badge bg-orange-soft text-orange mb-1">识别结论</span>
-                                            <h1 id="res-cn" class="display-5 fw-bold text-dark mb-0">---</h1>
-                                            <p id="res-en" class="text-muted fst-italic small">---</p>
-                                        </div>
-                                        <div class="col-md-5 px-3 text-center">
-                                            <label class="small fw-bold text-muted mb-1 d-block">置信度</label>
-                                            <span id="res-conf" class="h2 fw-bold text-orange">0%</span>
-                                            <div class="progress rounded-pill mt-2" style="height: 10px; background: #fff5eb;">
-                                                <div id="conf-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-orange-gradient" style="width: 0%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div id="default-msg" class="text-center opacity-50 py-4">
-                                    <i class="fas fa-shield-dog fa-3x text-orange-light mb-2"></i>
-                                    <p class="text-muted small px-4">上传照片后点击上方按钮即可获得分析结论</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <footer class="text-center py-2 opacity-50">
-                <p class="smaller mb-0">项目组成员：兰棱棱、郑柯月、周洲、刘童</p>
-            </footer>
-        </div>
-    </div>
+    <div id="auth-modal" class="modal-overlay"><div class="modal-card"><h2>身份验证</h2><input type="text" id="user-in" placeholder="用户名" class="ipt"><input type="password" id="pass-in" placeholder="密码" class="ipt"><button class="btn-primary" onclick="doAuth()">确 认</button><p onclick="switchAuthMode()" style="color:#e69138; cursor:pointer; margin-top:15px;">切换注册</p><button onclick="closeAuthModal()" style="background:none; border:none; color:#999; margin-top:10px; cursor:pointer;">取消</button></div></div>
     <script src="/static/js/main.js"></script>
 </body>
 </html>
