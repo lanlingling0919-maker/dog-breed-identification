@@ -5,7 +5,7 @@ from torchvision import models
 from loader import get_data_loaders
 from tqdm import tqdm
 import os
-import matplotlib.pyplot as plt  # 新增：用于绘图
+import matplotlib.pyplot as plt  # 用于绘图
 
 def train_model():
     # 1. 硬件配置
@@ -17,9 +17,11 @@ def train_model():
     learning_rate = 0.0003
     best_acc = 0.0
 
-    # 新增：用于记录绘图数据的列表
+    # 用于记录绘图数据的列表
     train_acc_history = []
     val_acc_history = []
+    train_loss_history = []
+    val_loss_history = []
 
     # 3. 获取数据加载器
     print("正在初始化数据流水线...")
@@ -63,8 +65,8 @@ def train_model():
         # --- 训练阶段 ---
         model.train()
         running_loss = 0.0
-        correct_train = 0  # 新增：记录训练集预测正确的数量
-        total_train = 0    # 新增：记录训练集总数
+        correct_train = 0  # 记录训练集预测正确的数量
+        total_train = 0    # 记录训练集总数
         
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} [Train]")
         
@@ -79,7 +81,7 @@ def train_model():
             
             running_loss += loss.item()
             
-            # 新增：计算训练准确率
+            # 计算训练准确率
             _, predicted = torch.max(outputs.data, 1)
             total_train += labels.size(0)
             correct_train += (predicted == labels).sum().item()
@@ -89,6 +91,8 @@ def train_model():
         # 计算并保存本轮训练准确率
         epoch_train_acc = 100 * correct_train / total_train
         train_acc_history.append(epoch_train_acc)
+        avg_train_loss = running_loss / len(train_loader)
+        train_loss_history.append(avg_train_loss)
 
         # --- 验证阶段 ---
         model.eval()
@@ -97,15 +101,23 @@ def train_model():
         print(f"正在对 Epoch {epoch+1} 进行考试（验证集测试）...")
         
         with torch.no_grad():
-            for inputs, labels in val_loader:
-                inputs, labels = inputs.to(device), labels.to(device)
-                outputs = model(inputs)
-                _, predicted = torch.max(outputs.data, 1)
-                total_val += labels.size(0)
-                correct_val += (predicted == labels).sum().item()
+            model.eval()
+            val_running_loss = 0.0
+            with torch.no_grad():
+                for inputs, labels in val_loader:
+                    inputs, labels = inputs.to(device), labels.to(device)
+                    outputs = model(inputs)
+                     # 计算验证集 Loss
+                    loss = criterion(outputs, labels)
+                    val_running_loss += loss.item()
+                    _, predicted = torch.max(outputs.data, 1)
+                    total_val += labels.size(0)
+                    correct_val += (predicted == labels).sum().item()
         
         val_acc = 100 * correct_val / total_val
         val_acc_history.append(val_acc) # 保存本轮验证准确率
+        avg_val_loss = val_running_loss / len(val_loader)
+        val_loss_history.append(avg_val_loss)
         
         avg_train_loss = running_loss / len(train_loader)
         print(f"--- 结果汇报 ---")
@@ -137,15 +149,25 @@ def train_model():
     plt.ylabel('Accuracy (%)')
     plt.legend()
     plt.grid(True)
-    
     # 保存图片到本地
     plt.savefig('accuracy_plot.png')
     print("✅ 准确率曲线已保存为 'accuracy_plot.png'")
-    
     # 显示图片
     plt.show()
-
     print(f"\n✅ 训练全部结束！历史最高准确率: {best_acc:.2f}%")
+
+    print("\n📊 正在生成 Loss 曲线图...")
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, epochs + 1), train_loss_history, label='Training Loss', color='red', marker='o')
+    plt.plot(range(1, epochs + 1), val_loss_history, label='Validation Loss', color='blue', marker='s')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss Value')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('loss_plot.png') # 保存为 loss_plot.png
+    plt.show()
+
 
 if __name__ == "__main__":
     train_model()
